@@ -1,0 +1,8 @@
+---
+title: "PHQ-9 Depression Severity and All-Cause Mortality: A Survey-Weighted Anaylsis of NHANES"
+format: html
+---
+
+## Status
+
+Plumbing phase in progress. This document will contain the full analysis once the `svydesign` object and mortality linkage are validated against a published NCHS benchmark.
