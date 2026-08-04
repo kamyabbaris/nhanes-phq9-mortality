@@ -1,0 +1,16 @@
+#R
+.Rhistory
+.RData
+
+#renv
+renv/library/
+
+
+#Quarto
+/.quarto/
+*_files/
+
+#Data - not committed
+data/raw/*
+data/processed/*
+
