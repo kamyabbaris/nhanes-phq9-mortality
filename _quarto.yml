@@ -1,0 +1,12 @@
+project:
+  type: default
+  output-dir: docs
+
+title: "PHQ-9 and All-Cause Mortality in NHANES"
+author: "Kami"
+
+format:
+  html:
+    toc: true
+    code-fold: true
+    theme: cosmo
