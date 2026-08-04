@@ -13,4 +13,5 @@ renv/library/
 #Data - not committed
 data/raw/*
 data/processed/*
-
+!data/raw/.gitkeep
+!data/processed/.gitkeep
