@@ -11,6 +11,8 @@ Does PHQ-9 defined depression severity predict all-cause mortality in the US adu
 - NHANES demographic, questionnaire (PHQ-9), and MEC exam data --- Accessed via the R package `nhanesA`
 - NCHS Public-Use Linked Mortality File (LMF) --- fixed width, joined on `SEQN`
 
+**Cycle Range**: 2005-2006 through 2017-2018 (seven NHANES cycles). The range is bounded on both ends: PHQ-9 (`DPQ`) was first added to NHANES in the 2005-2006 cycle, and the public-use Linked Mortality File currently covers cycles only thorugh 2017-2018 (follow-up through December 31, 2019). Pooling all seven maximizes death events for statistical power; the tradeoff is the uneven follow-up length across cohorts (~13 years for 2005-2006 vs. ~1-2 years for 2017-2018), which the Cox model accomodates natively through censoring rather than requiring equal follow-up per person.
+
 **Data is not included in this repository.** The LMF's NCHS data-use terms prohibit redistribution. To reproduce:
 1. `R/01_download_data.R` pulls NHANES data directly via `nhanesA`
 2. Request the LMF from NCHS and place it in `data/raw`
