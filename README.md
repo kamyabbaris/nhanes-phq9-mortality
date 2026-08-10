@@ -19,6 +19,7 @@ Does PHQ-9 defined depression severity predict all-cause mortality in the US adu
 1. `R/01_download_data.R` pulls NHANES data directly via `nhanesA`
 2. Request the LMF from NCHS and place it in `data/raw`
 
+**PHQ-9 scoring**: Complete-case scoring, meaning all 9 items must be answered, if any single missing item exists the total score per entry is set to NA rather than prorating. `DPQ100` (a difficulty follow-up question) is excluded, as it is not part of the PHQ-9 instrument itself. Severity bands follow the standard PHQ-9 cutiffs: Minimal (0-4), Mild (5-9), Moderate (10-14), Moderately severe (15-19), Severe (20-27). Pooled across seven cycles, the distribution is strongly right-skewed (67.5% minimal, 0.8% severe), consistent with published PHQ-9 distributions in general (non-clinical) population samples.
 ## Reproducing this analysis
 ```bash
 git clone <repo-url>
