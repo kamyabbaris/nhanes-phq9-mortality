@@ -47,7 +47,7 @@ print(table(lmf_all$mortstat, useNA="ifany"))
 # Join LMF to DEMO on SEQN, per cycle #
 
 keep_cols <- c(
-  "SEQN", "RIAGENDR", "RIDAGEYR", "RIDRETH1", "INDFMPIR",
+  "SEQN", "RIAGENDR", "RIDAGEYR", "RIDRETH1","DMDEDUC2", "DMDMARTL", "INDFMPIR",
   "WTINT2YR", "WTMEC2YR", "SDMVPSU", "SDMVSTRA",
   "eligstat", "mortstat", "ucod_leading", "permth_int", "permth_exm", "cycle")
 #some column names had changed in later iterations, without the keep_cols it will give an error)
