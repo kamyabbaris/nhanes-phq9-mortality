@@ -17,3 +17,5 @@ data/processed/*
 !data/processed/.gitkeep
 data/derived/*
 !data/derived/.gitkeep
+
+**/*.quarto_ipynb
