@@ -54,5 +54,10 @@ Full model output: `docs/cox_model_hr_table.html`. See `R/11_cox_model.R`.
 
 **Note**: svycoxph() requires explicit exclusion of zero-weight rows before fitting (a documented package-level requirement, not specific to this dataset). For more, see script comments.
 
+**Proportional hazards check**: `cox.zph()` on the survey-weighted model produced odd results (chi-square values near zero, p ~1 for every covariate). `cox.zph()` is documented and tested against plain `coxph()` fits rather than `svycoxph()`, I assume this is the reason. As a workaround to my case, I made a parallel `coxph()` model that fits the same complete-case data, using case weights normalized to the real sample size (not raw survey weights, `coxph()` misinterpreted them as literal row-duplication counts). This diagnostic-only model found a clear violation for age (X^2=27.5, p<0.001), and weaker violations for sex (p=0.009) and CVD (p=0.037); PHQ-9 category itself showed no evidence of violation (p=0.29).
+
+Age was then stratified (`strata(age_group)`, four bands) in a refit of the primary model, since its violation was by far the largest and a stratified variable no longer requires an assumed-constant hazard ratio. Sex and CVD's more modest violations are noted as a limitation rather than remedied, to avoid over-fragmenting the model's risk sets. The headline PHQ-9 hazard ratios are materially unchanged after this correction (Moderately severe: 1.64 -> 1.76), indicating the primary finding is not sensitive to this modeling choice. 
+
+See `R/12_cox_ph_check.R`; final model: `docs/cox_model_v2_hr_table.html`.
 ##License
 MIT
