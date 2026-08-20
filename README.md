@@ -59,5 +59,18 @@ Full model output: `docs/cox_model_hr_table.html`. See `R/11_cox_model.R`.
 Age was then stratified (`strata(age_group)`, four bands) in a refit of the primary model, since its violation was by far the largest and a stratified variable no longer requires an assumed-constant hazard ratio. Sex and CVD's more modest violations are noted as a limitation rather than remedied, to avoid over-fragmenting the model's risk sets. The headline PHQ-9 hazard ratios are materially unchanged after this correction (Moderately severe: 1.64 -> 1.76), indicating the primary finding is not sensitive to this modeling choice. 
 
 See `R/12_cox_ph_check.R`; final model: `docs/cox_model_v2_hr_table.html`.
+### Sensitivity analysis: propensity-score weighting vs. direct adjustment
+
+As a robustness check, PHQ-9 was collapsed to a binary "depression" exposure (score ≥ 10, matching the threshold validated against NCHS Data Brief 303) and compared under two different confounding-adjustment strategies:
+
+| Method | HR | 95% CI | p |
+|---|---|---|---|
+| Direct adjustment (covariates in model) | 1.31 | 1.07–1.60 | 0.009 |
+| Propensity-score weighting (IPTW, trimmed at 99th percentile) | 1.25 | 0.99–1.58 | 0.060 |
+
+The two estimates are directionally consistent with substantially overlapping confidence intervals, supporting the robustness of the primary finding to the choice of confounding-adjustment method. The propensity-weighted estimate's borderline significance (CI lower bound 0.99) is consistent with IPTW's known lower statistical efficiency relative to direct adjustment, rather than a genuine disagreement between methods.
+
+See `R/13_sensitivity_propensity.R`.
+
 ##License
 MIT
