@@ -39,14 +39,14 @@ quarto render reports/analysis.qmd
 
 ## Results
 
-**Adjusted Cox proportional hazards model** (n= 22,741; 2,108 deaths), PHQ-9 severity vs. all-cause mortality, adjusted for age, sex, race/ethnicity, education, marital status, income ratio, BMI, smoking status, diabetes, and CVD:
+**Adjusted Cox proportional hazards model** (n = 22,471; 2,108 deaths), PHQ-9 severity vs. all-cause mortality, adjusted for age (stratified — see Proportional Hazards Check below), sex, race/ethnicity, education, marital status, income ratio, BMI, smoking status, diabetes, and CVD:
 
 | PHQ-9 category (vs. Minimal) | HR | 95% CI | p |
 |---|---|---|---|
-| Mild (5–9) | 1.23 | 1.07–1.42 | 0.003 |
-| Moderate (10–14) | 1.29 | 1.01–1.65 | 0.043 |
-| Moderately severe (15–19) | 1.64 | 1.14–2.36 | 0.008 |
-| Severe (20–27) | 1.31 | 0.67–2.58 | 0.431 |
+| Mild (5–9) | 1.22 | 1.05–1.41 | 0.007 |
+| Moderate (10–14) | 1.31 | 1.02–1.68 | 0.032 |
+| Moderately severe (15–19) | 1.76 | 1.19–2.58 | 0.004 |
+| Severe (20–27) | 1.19 | 0.59–2.42 | 0.601 |
 
 A clear, largely monotonic dose-response can be seen from Mild through Moderately severe. The Severe category's lower point estimate and loss of significance is most likely due to the small sample size (n= 337 in the raw data, before further restriction with covariate-completeness) rather than a genuine reversal of the trend. The confidence interval in the Severe category is nearly twice as wide as Moderately severe's, consistent with an underpowered subgroup rather than a true ceiling effect. 
 
