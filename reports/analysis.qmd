@@ -3,18 +3,112 @@ title: "PHQ-9 Depression Severity and All-Cause Mortality: A Survey-Weighted Ana
 format: html
 ---
 
-## Status
+## Methods
 
-Plumbing phase complete and validated. The full pipeline going from: raw data acquisition -> fixed-width LMF parsing -> PHQ-9 scoring -> covariate construction -> survey design weighting, reproduces a published NCHS benchmark exactly.
+### Data source
 
-## Validation: reproducing a published estimate
+Data are drawn from seven consecutive NHANES cycles (2005-2006 through 2017-2018), chosen to span the full period for which both PHQ-9 depression screening and public-use mortality linkage are available (see repository README for the full cycle-selection rationale). All analyses account for NHANES's complex survey design; sampling weights, clustering, and stratification (using the `survey` package).
 
-To check whether the full pipeline is working, I reproduced the headline estimate from Brody, Pratt, and Hughes (2018), *Prevalence of Depression Among Adults Aged 20 and Over: United States, 2013-2016* (NCHS Data Brief No. 303: 8.1% weighted prevalance of PHQ-9 >=10 ("depression") among adults aged 20 and over, using pooled NHANES 2013-2016 cycles.
+### Exposure: PHQ-9 depression severity
 
-Applying my pipeline to the same population (cycles H and I, ages 20+, MEC exam weight divided by 2 to reflect the two-cycle pool) produced an identical estimate: **8.1%**.
+PHQ-9 was scored using complete-case scoring (all 9 items required; any single missing item sets the score to `NA`, no prorating) and grouped into the standard five severity bands (Minimal 0-4, Mild 5-9, Moderate 10-14, Moderately severe 15-19, Severe 20-27).
+For the sensitivity analysis, PHQ-9 was additionally collapsed to a binary "depression" indicator (score >= 10), matching the threshold used in Brody, Pratt & Hughes (2018), NCHS Data Brief No. 303 - a threshold this project's own pipeline also reproduced to the exact published prevalance (see validation below).
 
-This confirms the weighting, survey design, and PHQ-9 scoring logic are all functioning correctly, end to end, against an independent external benchmark rather than only internal consistency checks. 
+### Outcome: all-cause mortality
 
-## Next steps
+Mortality status and follow-up time were obtained from the NCHS public-use Linked Mortality File, linked to NHANES respondents by `SEQN`. Follow-up time is measure in months from MEC exam date; only mortality-linkage-eligible respondents (`ELIGSTAT == 1`) are included.
 
-Cox proportional hazards model construction, using the full seven-cycle pooled dataset and design object.
+### Covariates
+
+Age, sex, race/ethnicity, education, marital status, income-to-poverty ratio, BMI, smoking status, diabetes, and cardiovascular disease (composite of self-reported congestive heart failure, coronary heart disease, angina, heart attack, and stroke).
+
+### Survey design
+
+The MEC exam weight (`WTMEC2YR`) was used rather than the interview weight because the PHQ-9 was administered during the MEC exam (confimed against NCHS's own documentation for each DPQ data file). The weight was divided by 7 to account for pooling seven cycles. Sampling strata were confirmed to be globally unique across all seven cycles (no cross-cycle collision), so cycles could be pooled directly.
+
+### Statistical analysis
+
+A survey-weighted Cox proportional hazards model (`svycoxph`) was fit for PHQ-9 category (Minimal as reference) and all-cause mortality, adjusted for the covariates above. The proportional hazards assumption was checked for every covariate; age showed the strongest violation and was addressed via stratification in a refit model (sex and CVD's more modest violations are reported as limitations rather than remedied. See discussion for further).
+As a sensitivity analysis, the binary depression exposure was also modeled using inverse probability of treatment weighting (IPTW) based on a propesnity score for depression status, as an alternative to direct covariate adjustment for confounding.
+
+## Results
+
+### Table 1: Baseline characteristics by PHQ-9 severity
+
+```{r}
+#| label: table1
+#| echo: false
+#| warning: false
+#| message: false
+
+library(here)
+library(survey)
+library(gtsummary)
+
+nhanes_design <- readRDS(here("data/derived/nhanes_design.rds"))
+
+tbl_svysummary(
+  nhanes_design,
+  by = phq9_category,
+  include = c(age, sex, race_ethnicity, education, marital_status,
+              income_ratio, bmi, smoking_status, diabetes, cvd)
+)
+```
+
+A clear, largely monotonic pattern is visible across nearly every covariate. Sex shows a gradient closely matching well-established psychiatric epidemiology (roughly 2:1 female:male by Moderately severe); cardiovascular disease shows the steepest gradient of any covariate (7.3% to 26%); race/ethnicity is comparatively flat by contrast. See the project README for the full discussion of these patterns.
+
+### Kaplan-Meier survival curves
+
+```{r}
+#| label: km-curves
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Survival probability by PHQ-9 severity category"
+
+library(survival)
+
+design_km <- subset(nhanes_design, mortstat %in% c(0, 1))
+km_fit <- svykm(Surv(permth_exm, mortstat) ~ phq9_category, design = design_km)
+
+plot(km_fit[[1]], col = 1, xlab = "Follow-up (months)", ylab = "Survival probability", ylim = c(0.7, 1))
+for (i in 2:5) lines(km_fit[[i]], col = i)
+legend("bottomleft", legend = names(km_fit), col = 1:5, lty = 1)
+```
+
+### Adjusted Cox proportional hazards model
+
+```{r}
+#| label: cox-model
+#| echo: false
+#| warning: false
+#| message: false
+
+library(gtsummary)
+
+cox_model_v2 <- readRDS(here("data/derived/cox_model_ph_adjusted.rds"))
+invisible(capture.output(tbl <- tbl_regression(cox_model_v2, exponentiate = TRUE)))
+tbl
+```
+
+n = `r cox_model_v2$n`, `r cox_model_v2$nevent` deaths. A clear, largely monotonic dose-response is evident from Mild through Moderately severe. The Severe category's lower point estimate and loss of significance is most plausibly attributable to its small sample size (n = 337 in the raw data) rather than a genuine reversal of the trend — its confidence interval is nearly twice as wide as Moderately severe's.
+
+Age was stratified in this model to address a proportional hazards violation identified via diagnostic testing (see `R/12_cox_ph_check.R`); sex and CVD showed more modest violations, documented as limitations below rather than remedied.
+
+## Discussion
+
+This anaylsis found a largely monotonic dose-response relationship between PHQ-9 depression severity and all-cause mortality, adjusted for a substantial set of demographic, socioeconomic, and clinical confounders. The association held after correcting for a proportional hazards violation in age (the model's strongest and mechanically most plausible violation, given that mortality risk does not rise linearly with age), and was directionally and materially consistent under an entirely different confounding-adjustment strategy (propensity-score weighting), rather than depending on one specific analytic choice.
+
+### Limitations 
+
+**The Severe category (PHQ-9 20–27) was underpowered.** With only 337 respondents in the raw data, its confidence interval was nearly twice as wide as the Moderately severe category's, and its point estimate (below Moderately severe's) most plausibly reflects sampling variability in a small subgroup rather than a genuine reversal of the broader dose-response trend.
+
+**Proportional hazards violations in sex and cardiovascular disease were identified but not remedied.** Age's violation was addressed via stratification; sex (p = 0.009) and CVD (p = 0.037) showed more modest violations that were left as direct covariates rather than stratified, to avoid fragmenting the model's risk sets further. Their reported hazard ratios should be interpreted as an average effect across the follow-up period rather than a precisely constant one.
+
+**Reverse causation cannot be excluded.** Several covariates in this model — particularly cardiovascular disease and diabetes — are at least as plausible as consequences of depression (via reduced treatment adherence, health behaviors, or access to care) as they are independent confounders. A cross-sectional baseline measurement cannot establish temporal or causal direction between depression severity and comorbidity burden.
+
+**Unmeasured confounding remains possible.** This model adjusts for a substantial covariate set, but cannot rule out residual confounding from factors not measured in NHANES (e.g., social support, treatment history, occupational exposures).
+
+**Complete-case PHQ-9 scoring** (requiring all nine items answered) was a deliberate, conservative choice over prorating partial responses; this reduces the analytic sample somewhat but avoids introducing an additional, harder-to-defend imputation assumption.
+
+**Generalizability** is limited to the non-institutionalized US civilian population captured by NHANES's sampling frame across 2005–2018; findings may not extend to institutionalized populations, more recent years, or other countries' populations and healthcare contexts.
