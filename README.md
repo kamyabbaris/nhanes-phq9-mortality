@@ -54,7 +54,12 @@ cd nhanes-phq9-mortality
 R -e "renv::restore()"
 quarto render reports/analysis.qmd
 ```
-**Verified (26 August 2026)**: a full clean run of all thirteen scripts (`R/00_setup.R` through `R/13_sensitivity_propensity.R`), executed in numeric order on a fresh R session with no manual intervention, reproduces every reported result exactly (the 42,022-person eligible cohort, the 26,333-participant analytic sample, the 8.1% published benchmark match, the 214-cluster survey design, and both the primary and sensitivity Cox model hazard ratios).
+or you can run the whole pipeline in one command (as of 26/08/2026):
+```bash
+Rscript run_all.R
+```
+
+**Verified (26 August 2026)**: a full clean run of all twelve scripts (`R/00_setup.R` through `R/13_sensitivity_propensity.R`), executed in numeric order on a fresh R session with no manual intervention, reproduces every reported result exactly (the 42,022-person eligible cohort, the 26,333-participant analytic sample, the 8.1% published benchmark match, the 214-cluster survey design, and both the primary and sensitivity Cox model hazard ratios).
 
 ## Method (brief)
 - **Design**: retrospective cohort constructed from a cross-sectional survey linked to mortality records; time zero is the MEC exam date, so exposure measurement and start of follow-up coincide and no immortal time is accrued

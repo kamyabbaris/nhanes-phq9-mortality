@@ -36,10 +36,13 @@ print(zph_check)
 nhanes_design$variables$age_group <- cut(
   nhanes_design$variables$age,
   breaks = c(-1, 39, 59, 74, Inf),
-  labels = c("18-39", "40-59", "60-74", "75+")
+  labels = c("20-39", "40-59", "60-74", "75+")
 )
 
-design_cox <- subset(nhanes_design, mortstat %in% c(0, 1) & wt_mec_adj > 0)
+nhanes_design$variables$.complete <- complete.cases(nhanes_design$variables[model_vars])
+
+design_cox <- subset(nhanes_design, 
+                     mortstat %in% c(0, 1) & wt_mec_adj > 0 & .complete)
 
 cox_model_v2 <- svycoxph(
   Surv(permth_exm, mortstat) ~ phq9_category + strata(age_group) + sex +
