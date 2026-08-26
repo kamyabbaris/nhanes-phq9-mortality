@@ -9,7 +9,19 @@ library(gtsummary)
 
 nhanes_design <- readRDS("data/derived/nhanes_design.rds")
 
-design_cox <- subset(nhanes_design, mortstat %in% c(0, 1) & wt_mec_adj > 0)
+# Complete-case analysis: pre-specified policy. Missingness in PHQ-9 items and
+# MEC attendance is plausibly MNAR (severity drives non-response), so multiple
+# imputation would not remove the bias. Applied explicitly here rather than
+# relying on the default na.action inside svycoxph().
+
+model_vars <- c("phq9_category", "age", "sex", "race_ethnicity", "education",
+                "marital_status", "income_ratio", "bmi", "smoking_status",
+                "diabetes", "cvd", "permth_exm", "mortstat")
+
+nhanes_design$variables$.complete <- complete.cases(nhanes_design$variables[model_vars])
+
+design_cox <- subset(nhanes_design,
+                     mortstat %in% c(0, 1) & wt_mec_adj > 0 & .complete)
 
 cox_model <- svycoxph(
   Surv(permth_exm, mortstat) ~ phq9_category + age + sex + race_ethnicity +
