@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PHQ-9 Depression Severity and All-Cause Mortality — NHANES</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      max-width: 700px;
+      margin: 60px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      color: #222;
+    }
+    h1 { font-size: 1.6em; margin-bottom: 0.2em; }
+    .subtitle { color: #555; margin-top: 0; }
+    .headline {
+      background: #f5f5f5;
+      border-left: 4px solid #185FA5;
+      padding: 16px 20px;
+      margin: 30px 0;
+    }
+    .links a {
+      display: inline-block;
+      margin-right: 20px;
+      color: #185FA5;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .links a:hover { text-decoration: underline; }
+    table { border-collapse: collapse; margin: 15px 0; }
+    th, td { padding: 6px 14px; text-align: left; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+
+  <h1>PHQ-9 Depression Severity and All-Cause Mortality</h1>
+  <p class="subtitle">A survey-weighted Cox analysis of NHANES 2005–2018</p>
+
+  <div class="links">
+    <a href="reports/analysis.html">Full report →</a>
+    <a href="https://github.com/kamyabbaris/nhanes-phq9-mortality">Source code (GitHub) →</a>
+  </div>
+
+  <div class="headline">
+    <strong>Headline result:</strong> after adjustment for age, sex, race/ethnicity, education, marital status, income, BMI, smoking, diabetes, and cardiovascular disease, PHQ-9 depression severity shows a largely monotonic dose-response relationship with all-cause mortality risk (n = 22,471; 2,108 deaths).
+    <table>
+      <tr><th>PHQ-9 category</th><th>HR</th><th>95% CI</th></tr>
+      <tr><td>Mild</td><td>1.22</td><td>1.05–1.41</td></tr>
+      <tr><td>Moderate</td><td>1.31</td><td>1.02–1.68</td></tr>
+      <tr><td>Moderately severe</td><td>1.76</td><td>1.19–2.58</td></tr>
+      <tr><td>Severe</td><td>1.19</td><td>0.59–2.42</td></tr>
+    </table>
+  </div>
+
+  <p>The full pipeline — from raw NHANES/mortality-linkage data through a validated, published-benchmark-matching survey design, an adjusted Cox model, proportional hazards diagnostics, and a propensity-score sensitivity analysis — is documented and reproducible from the linked repository.</p>
+
+</body>
+</html>
