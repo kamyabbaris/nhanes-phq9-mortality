@@ -16,7 +16,7 @@ For the sensitivity analysis, PHQ-9 was additionally collapsed to a binary "depr
 
 ### Outcome: all-cause mortality
 
-Mortality status and follow-up time were obtained from the NCHS public-use Linked Mortality File, linked to NHANES respondents by `SEQN`. Follow-up time is measure in months from MEC exam date; only mortality-linkage-eligible respondents (`ELIGSTAT == 1`) are included.
+Mortality status and follow-up time were obtained from the NCHS public-use Linked Mortality File, linked to NHANES respondents by `SEQN`. Follow-up time is measured in months from MEC exam date; only mortality-linkage-eligible respondents (`ELIGSTAT == 1`) are included.
 
 ### Covariates
 

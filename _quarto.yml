@@ -9,4 +9,4 @@ format:
   html:
     toc: true
     code-fold: true
-    theme: cosmo
+    theme: darkly
