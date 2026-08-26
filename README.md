@@ -31,6 +31,7 @@ cd nhanes-phq9-mortality
 R -e "renv::restore()"
 quarto render reports/analysis.qmd
 ```
+**Verified (26 August 2026)**: a full clean run of all thirteen scripts (`R/00_setup.R` through `R/13_sensitivity_propensity.R`), executed in numeric order on a fresh R session with no manual interventionm reproduces every reported result exactly (the 42,022 person eligible cohort, the 8.1% published benchmark match, the 214 cluster survery design, and bot the primary and sensitivity Cox model hazard ratios).
 ## Method (brief)
 - **Survey design**: `svydesign`, combining NHANES cycles with MEC exam weights divided across the number of pooled cycles
 - **Exposure**: PHQ-9 severity category
