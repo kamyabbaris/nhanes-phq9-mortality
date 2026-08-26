@@ -1,9 +1,13 @@
 # PHQ-9 Depression Severity and All-Cause Mortality
 ### Survey weighted Cox analysis of NHANES
 
+**🔗 [Live report & results](https://kamyabbaris.github.io/nhanes-phq9-mortality/)**
+
 ## Status
-Plumbing phase - building the reproducible pipeline (svydesign object, LMF linkage). Analysis and write-up to follow.
+**Complete.** Full pipeline — data acquisition through an adjusted, proportional-hazards-checked Cox model and a propensity-score sensitivity analysis — validated end-to-end and reproducibility-tested (see below).
+
 **Plumbing validated (13 Aug 2026)**: the full pipeline reproduces a published NCHS benchmark exactly. Applying the survey design and PHQ-9 scoring to NHANES 2013-2016 (ages 20+) yields 8.1% weighted prevalence of PHQ-9 >=10, matching Brody, Pratt & Hughes (2018), NCHS Data Brief No. 303, to the reported decimal. See `R/07_validation.R`.
+
 ## Research question
 Does PHQ-9 defined depression severity predict all-cause mortality in the US adult population, after accounting for the complex NHANES survey design?
 
@@ -13,7 +17,7 @@ Does PHQ-9 defined depression severity predict all-cause mortality in the US adu
 
 **Cycle Range**: 2005-2006 through 2017-2018 (seven NHANES cycles). The range is bounded on both ends: PHQ-9 (`DPQ`) was first added to NHANES in the 2005-2006 cycle, and the public-use Linked Mortality File currently covers cycles only through 2017-2018 (follow-up through December 31, 2019). Pooling all seven maximizes death events for statistical power; the tradeoff is the uneven follow-up length across cohorts (~13 years for 2005-2006 vs. ~1-2 years for 2017-2018), which the Cox model accommodates natively through censoring rather than requiring equal follow-up per person.
 
-**Linkage & eligibility**: Pooling all seven cycles yields 70,190 respondants. Out of those, 42,022 (~60%) were mortality-linkage eligible (`ELIGSTAT==1`); 28,168 were excluded because they were either under 18 at the time of the exam (mortality data is not released for minors) or had insufficient identifying information for NCHS to attempt linkage to the National Death Index. The eligible cohort (n=42,022) is the analytic sample carried forward into the survey design and Cox model.
+**Linkage & eligibility**: Pooling all seven cycles yields 70,190 respondents. Out of those, 42,022 (~60%) were mortality-linkage eligible (`ELIGSTAT==1`); 28,168 were excluded because they were either under 18 at the time of the exam (mortality data is not released for minors) or had insufficient identifying information for NCHS to attempt linkage to the National Death Index. The eligible cohort (n=42,022) is the analytic sample carried forward into the survey design and Cox model.
 
 **Data is not included in this repository.** The LMF's NCHS data-use terms prohibit redistribution. To reproduce:
 1. `R/01_download_data.R` pulls NHANES data directly via `nhanesA`
@@ -24,6 +28,7 @@ Does PHQ-9 defined depression severity predict all-cause mortality in the US adu
 **Survey design**: `svydesign` uses the MEC exam weight (`WTMEC2YR`), divided by 7 to account for pooling seven cycles. I went with `WTMEC2YR` because PHQ-9 was collected during the MEC exam, not the interview. Before combining cycles, `SDMVSTRA` was confirmed to be globally unique across all seven cycles (thankfully no stratum-number was reused between cycles), so cycles could be pooled directly without constructing a combined cycle+stratum identifier. The resulting design has 214 clusters, consistent with NCHS's standard masked-variance convention of ~2 PSUs per stratum (101 strata with 2 PSUs, 4 strata with 3, confirmed directly against the data).
 
 NCHS's own documentation for each DPQ data file confirms this directly: "Mobile Examination Center (MEC) participants... were eligible" for the depression screener, and states that "The NHANES full sample 2-Year MEC Exam Weights (WTMEC2YR) should be used to analyze these data" (e.g. https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2005/DataFiles/DPQ_E.htm).
+
 ## Reproducing this analysis
 ```bash
 git clone <repo-url>
@@ -31,7 +36,8 @@ cd nhanes-phq9-mortality
 R -e "renv::restore()"
 quarto render reports/analysis.qmd
 ```
-**Verified (26 August 2026)**: a full clean run of all thirteen scripts (`R/00_setup.R` through `R/13_sensitivity_propensity.R`), executed in numeric order on a fresh R session with no manual interventionm reproduces every reported result exactly (the 42,022 person eligible cohort, the 8.1% published benchmark match, the 214 cluster survery design, and bot the primary and sensitivity Cox model hazard ratios).
+**Verified (26 August 2026)**: a full clean run of all thirteen scripts (`R/00_setup.R` through `R/13_sensitivity_propensity.R`), executed in numeric order on a fresh R session with no manual intervention, reproduces every reported result exactly (the 42,022-person eligible cohort, the 8.1% published benchmark match, the 214-cluster survey design, and both the primary and sensitivity Cox model hazard ratios).
+
 ## Method (brief)
 - **Survey design**: `svydesign`, combining NHANES cycles with MEC exam weights divided across the number of pooled cycles
 - **Exposure**: PHQ-9 severity category
@@ -50,17 +56,18 @@ quarto render reports/analysis.qmd
 | Moderately severe (15–19) | 1.76 | 1.19–2.58 | 0.004 |
 | Severe (20–27) | 1.19 | 0.59–2.42 | 0.601 |
 
-A clear, largely monotonic dose-response can be seen from Mild through Moderately severe. The Severe category's lower point estimate and loss of significance is most likely due to the small sample size (n= 337 in the raw data, before further restriction with covariate-completeness) rather than a genuine reversal of the trend. The confidence interval in the Severe category is nearly twice as wide as Moderately severe's, consistent with an underpowered subgroup rather than a true ceiling effect. 
+A clear, largely monotonic dose-response can be seen from Mild through Moderately severe. The Severe category's lower point estimate and loss of significance is most likely due to the small sample size (n= 337 in the raw data, before further restriction with covariate-completeness) rather than a genuine reversal of the trend. The confidence interval in the Severe category is nearly twice as wide as Moderately severe's, consistent with an underpowered subgroup rather than a true ceiling effect.
 
-Full model output: `docs/cox_model_hr_table.html`. See `R/11_cox_model.R`.
+Full model output: `docs/cox_model_v2_hr_table.html`. See `R/11_cox_model.R`.
 
 **Note**: svycoxph() requires explicit exclusion of zero-weight rows before fitting (a documented package-level requirement, not specific to this dataset). For more, see script comments.
 
 **Proportional hazards check**: `cox.zph()` on the survey-weighted model produced odd results (chi-square values near zero, p ~1 for every covariate). `cox.zph()` is documented and tested against plain `coxph()` fits rather than `svycoxph()`, I assume this is the reason. As a workaround to my case, I made a parallel `coxph()` model that fits the same complete-case data, using case weights normalized to the real sample size (not raw survey weights, `coxph()` misinterpreted them as literal row-duplication counts). This diagnostic-only model found a clear violation for age (X^2=27.5, p<0.001), and weaker violations for sex (p=0.009) and CVD (p=0.037); PHQ-9 category itself showed no evidence of violation (p=0.29).
 
-Age was then stratified (`strata(age_group)`, four bands) in a refit of the primary model, since its violation was by far the largest and a stratified variable no longer requires an assumed-constant hazard ratio. Sex and CVD's more modest violations are noted as a limitation rather than remedied, to avoid over-fragmenting the model's risk sets. The headline PHQ-9 hazard ratios are materially unchanged after this correction (Moderately severe: 1.64 -> 1.76), indicating the primary finding is not sensitive to this modeling choice. 
+Age was then stratified (`strata(age_group)`, four bands) in a refit of the primary model, since its violation was by far the largest and a stratified variable no longer requires an assumed-constant hazard ratio. Sex and CVD's more modest violations are noted as a limitation rather than remedied, to avoid over-fragmenting the model's risk sets. The headline PHQ-9 hazard ratios are materially unchanged after this correction (Moderately severe: 1.64 -> 1.76), indicating the primary finding is not sensitive to this modeling choice.
 
 See `R/12_cox_ph_check.R`; final model: `docs/cox_model_v2_hr_table.html`.
+
 ### Sensitivity analysis: propensity-score weighting vs. direct adjustment
 
 As a robustness check, PHQ-9 was collapsed to a binary "depression" exposure (score ≥ 10, matching the threshold validated against NCHS Data Brief 303) and compared under two different confounding-adjustment strategies:
@@ -78,7 +85,7 @@ See `R/13_sensitivity_propensity.R`.
 
 An AI model (Anthropic, Sonnet 5) was used in this project in the cases listed below:
 - I do not know html, so for the production of the "interactive" reports I got assistance from the model.
-- Certain debugging tasks (e.g. the fixed-width to rds) required extensive debugging that I am not that familiar with, however I made sure to check every step throughout the debugging to make sure no errors were committed.  
+- Certain debugging tasks (e.g. the fixed-width to rds) required extensive debugging that I am not that familiar with, however I made sure to check every step throughout the debugging to make sure no errors were committed.
 
 ## License
 MIT
