@@ -74,5 +74,11 @@ The two estimates are directionally consistent with substantially overlapping co
 
 See `R/13_sensitivity_propensity.R`.
 
+## Use of AI
+
+An AI model (Anthropic, Sonnet 5) was used in this project in the cases listed below:
+- I do not know html, so for the production of the "interactive" reports I got assistance from the model.
+- Certain debugging tasks (e.g. the fixed-width to rds) required extensive debugging that I am not that familiar with, however I made sure to check every step throughout the debugging to make sure no errors were committed.  
+
 ## License
 MIT
