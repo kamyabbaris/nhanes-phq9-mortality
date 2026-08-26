@@ -16,7 +16,7 @@ nhanes_design <- svydesign(
   nest = TRUE,
   data = analytic_data
 )
-
+nhanes_design <- subset(nhanes_design, age>=20)
 print(nhanes_design)
 
 saveRDS(nhanes_design, "data/derived/nhanes_design.rds")

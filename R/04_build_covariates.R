@@ -15,8 +15,10 @@ build_covariates <- function(cyc) {
   mcq <- nhanesA::nhanes(paste0("MCQ_",cyc))
 
 # BMI
+# BMDSTATS is a labelled factor in most cycles but returns raw numeric codes in cycle G (1 = complete data for age group).
+  bmd <- as.character(bmx$BMDSTATS)
   bmx$BMXBMI_clean <- ifelse(
-    bmx$BMDSTATS %in% c("Complete data for age group", "Partial: Height and weight obtained"),
+    bmd %in% c("Complete data for age group", "1"),
     bmx$BMXBMI,
     NA
   )

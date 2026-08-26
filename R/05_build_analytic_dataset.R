@@ -26,8 +26,7 @@ analytic_data$education <- factor(
   educ_map[as.character(analytic_data$DMDEDUC2)],
   levels = c("Less than 9th grade", "9-11th grade (Includes 12th grade with no diploma)",
              "High school graduate/GED or equivalent", "Some college or AA degree",
-             "College graduate or above"),
-  ordered = TRUE
+             "College graduate or above")
 )
 
 # Marital status: same standardization
