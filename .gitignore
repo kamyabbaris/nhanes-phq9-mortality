@@ -9,6 +9,8 @@ renv/library/
 #Quarto
 /.quarto/
 *_files/
+!docs/reports/analysis_files/
+!docs/reports/analysis_files/**
 
 #Data - not committed
 data/raw/*
